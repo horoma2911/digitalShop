@@ -1,0 +1,51 @@
+name: gouanzouh
+description: "DigitalShop - Professional Sales & Stock Management App."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.1
+  intl: ^0.20.2
+  uuid: ^4.5.1
+  excel: ^4.0.0
+  pdf: ^3.11.1
+  path_provider: ^2.1.5
+  open_filex: ^4.5.0
+  fl_chart: ^0.70.2
+  shared_preferences: ^2.5.2
+  mobile_scanner: ^7.2.0
+  flutter_local_notifications: ^17.2.2
+  crypto: ^3.0.3
+  http: ^1.1.0
+  logger: ^2.7.0
+  connectivity_plus: ^7.3.1
+  sqflite: ^2.3.0
+  synchronized: ^3.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  mockito: ^5.7.0
+  build_runner: ^2.15.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/app_icon.png"
+  adaptive_icon_background: "#005A31"
+  adaptive_icon_foreground: "assets/app_icon.png"
+
+flutter:
+  uses-material-design: true
+  generate: true

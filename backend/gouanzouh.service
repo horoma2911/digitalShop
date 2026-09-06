@@ -1,0 +1,31 @@
+[Unit]
+Description=Gouanzouh Sales & Stock Management API (Docker Compose)
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/gouanzouh/backend
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+EnvironmentFile=/opt/gouanzouh/backend/.env
+
+# Start
+ExecStart=/usr/bin/docker-compose -f docker-compose.prod.yml up --no-log-prefix
+
+# Stop
+ExecStop=/usr/bin/docker-compose -f docker-compose.prod.yml down
+
+# Restart on failure
+Restart=always
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+
+# Resource limits (adjust as needed)
+MemoryLimit=1G
+
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

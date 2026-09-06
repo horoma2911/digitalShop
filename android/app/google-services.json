@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "986010311897",
+    "project_id": "digitalshop-7d8e2",
+    "storage_bucket": "digitalshop-7d8e2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986010311897:android:2c060146203687d023b2c8",
+        "android_client_info": {
+          "package_name": "com.horoma.DigitalShop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8NE0bxZA-h1VG0-j-FrKay7zF-YS_L6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
