@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +10,10 @@ import 'providers/stock_provider.dart';
 import 'providers/report_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/locale_provider.dart';
+import 'providers/sync_provider.dart';
+import 'services/connectivity_service.dart';
+import 'services/offline_queue_service.dart';
+import 'services/sync_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/product_list_screen.dart';
@@ -43,6 +48,13 @@ void main() async {
   }
 
   await NotificationService.init();
+
+  final queueService = OfflineQueueService();
+  final apiClient = ApiClient();
+  final syncService = SyncService(queueService, apiClient);
+  final connectivityService = ConnectivityService();
+  await connectivityService.initialize();
+
   runApp(
     MultiProvider(
       providers: [
@@ -51,6 +63,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ReportProvider()),
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => SyncProvider(syncService)),
+        Provider.value(value: connectivityService),
       ],
       child: SalesApp(apiReady: apiReady, initError: initError),
     ),
@@ -173,6 +187,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
+  late final StreamSubscription<bool> _connectivitySubscription;
 
   @override
   void initState() {
@@ -183,7 +198,55 @@ class _AppShellState extends State<AppShell> {
         context.read<StockProvider>().listenToData();
         context.read<ExpenseProvider>().listenToData();
       }
+
+      // Initial Sync Status
+      context.read<SyncProvider>().refreshQueueStats();
+
+      // Setup Connectivity Listener
+      final connectivity = context.read<ConnectivityService>();
+      _connectivitySubscription = connectivity.connectionStatus.listen((isOnline) {
+        ApiClient.setOnline(isOnline);
+        if (isOnline) {
+          _handleReturnOnline();
+        }
+      });
     });
+  }
+
+  void _handleReturnOnline() async {
+    final syncProvider = context.read<SyncProvider>();
+    await syncProvider.refreshQueueStats();
+    
+    if (syncProvider.hasPendingOperations) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Internet Restored. Seeding data to cloud...'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+      }
+      await syncProvider.startSync();
+      
+      // Refresh data after sync
+      if (mounted) {
+        context.read<StockProvider>().listenToData();
+        context.read<ExpenseProvider>().listenToData();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✓ Data seeded successfully.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
   }
 
   static const List<Widget> _screens = [

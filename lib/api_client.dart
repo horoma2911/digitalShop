@@ -15,6 +15,9 @@ class ApiClient {
   late OfflineQueueService _queueService;
   bool _isOnline = true;
 
+  static void setOnline(bool online) => _instance.setOnlineStatus(online);
+  static bool get online => _instance._isOnline;
+
   void setOnlineStatus(bool online) => _isOnline = online;
 
   static Uri _uri(String path) => Uri.parse('$API_BASE_URL$path');

@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/stock_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/sync_provider.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/app_colors.dart';
 
@@ -16,6 +17,7 @@ class DashboardScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final stock = context.watch<StockProvider>();
     final expenseProv = context.watch<ExpenseProvider>();
+    final syncProv = context.watch<SyncProvider>();
     
     final shop = auth.currentShop;
     
@@ -44,21 +46,33 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
       body: Column(
         children: [
-          if (auth.isOfflineMode)
+          if (auth.isOfflineMode || syncProv.hasPendingOperations)
             Container(
               width: double.infinity,
-              color: Colors.orange.shade800,
+              color: syncProv.hasPendingOperations ? Colors.blue.shade800 : Colors.orange.shade800,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.wifi_off, color: Colors.white, size: 18),
-                  SizedBox(width: 10),
+                  Icon(
+                    syncProv.hasPendingOperations ? Icons.sync : Icons.wifi_off,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Offline Mode: Data sync is paused. Login with internet to sync.',
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                      syncProv.hasPendingOperations
+                          ? 'Syncing ${syncProv.pendingCount} items to cloud...'
+                          : 'Offline Mode: Data sync is paused. Login with internet to sync.',
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
+                  if (syncProv.hasPendingOperations)
+                    const SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    ),
                 ],
               ),
             ),
